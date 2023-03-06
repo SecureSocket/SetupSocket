@@ -9,85 +9,82 @@ enable_trapping
 # Create empty progress bar
 setup_scroll_area
 
-for i in {1..99}; do
-    # Script version
-    version="v1.0"
+# Script version
+version="v1.0"
 
-    # Change directory to /home/secure
-    cd /home/secure
+# Change directory to /home/secure
+cd /home/secure
 
-    # Function to display the help information
-    display_help() {
-        echo "Usage: setup-socket [OPTION]"
-        echo "A command used for setup SocketOS."
-        echo ""
-        echo "Options:"
-        echo "  --help, -h          display this help and exit"
-        echo "  --version, -v       output version information and exit"
-        echo "  --install, -i       Install all repositories and dependencies"
-        echo "  --update, -u        Update all repositories and dependencies"
-        echo
-    }
+# Function to display the help information
+display_help() {
+    echo "Usage: setup-socket [OPTION]"
+    echo "A command used for setup SocketOS."
+    echo ""
+    echo "Options:"
+    echo "  --help, -h          display this help and exit"
+    echo "  --version, -v       output version information and exit"
+    echo "  --install, -i       Install all repositories and dependencies"
+    echo "  --update, -u        Update all repositories and dependencies"
+    echo
+}
 
-    # Function to display the version information
-    display_version() {
-        echo "setup-socket $version"
-    }
+# Function to display the version information
+display_version() {
+    echo "setup-socket $version"
+}
 
-    # Function to update all repositories and dependencies
-    update_tools() {
-        # Read the list of repos from a file
-        repos=($(cat /usr/local/bin/repo_name))
+# Function to update all repositories and dependencies
+update_tools() {
+    # Read the list of repos from a file
+    repos=($(cat /usr/local/bin/repo_name))
 
-        # Loop through the list of repos
-        for repo in "${repos[@]}"; do
-            # Check if the repo directory is a git repository
-            if [ -d "$repo/.git" ]; then
-                # If it is, update the repo
-                echo "Updating $repo"
-                cd "$repo"
-                (git pull  > /dev/null 2>&1)
-                cd ..
-                draw_progress_bar $i
-                ((i++))
-            fi
-        done
-        echo "All repositories and dependencies are up-to-date"
-    }
+    # Loop through the list of repos
+    for repo in "${repos[@]}"; do
+        # Check if the repo directory is a git repository
+        if [ -d "$repo/.git" ]; then
+            # If it is, update the repo
+            echo "Updating $repo"
+            cd "$repo"
+            (git pull  > /dev/null 2>&1)
+            cd ..
+            draw_progress_bar $i
+            ((i++))
+        fi
+    done
+    echo "All repositories and dependencies are up-to-date"
+}
 
-    # Function to install all repositories and dependencies
-    install_tools() {
-        # read repo list from file
-        repos=($(cat /usr/local/bin/repo_list))
-        repos1=($(cat /usr/local/bin/repo_name))
+# Function to install all repositories and dependencies
+install_tools() {
+    # read repo list from file
+    repos=($(cat /usr/local/bin/repo_list))
+    repos1=($(cat /usr/local/bin/repo_name))
 
-        for repo in ${!repos[*]}; do
-            # check if the repo directory exists
-            if [ ! -d "${repos[$repo]}" ]; then
-                # if it doesn't exist, clone the repo
-                echo "Installing ${repos1[$repo]}"
-                (git clone --depth 1 "${repos[$repo]}"  > /dev/null 2>&1)
-                draw_progress_bar $i
-                ((i++))
-            fi
-        done
-    }
+    for repo in ${!repos[*]}; do
+        # check if the repo directory exists
+        if [ ! -d "${repos[$repo]}" ]; then
+            # if it doesn't exist, clone the repo
+            echo "Installing ${repos1[$repo]}"
+            (git clone --depth 1 "${repos[$repo]}"  > /dev/null 2>&1)
+            draw_progress_bar $i
+            ((i++))
+        fi
+    done
+}
 
-    if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
-        display_help
-    elif [ "$1" == "--version" ] || [ "$1" == "-v" ]; then
-        display_version
-    elif [ "$1" == "--update" ] || [ "$1" == "-u" ]; then
-        update_tools
-        draw_progress_bar $i
-    elif [ "$1" == "--install" ] || [ "$1" == "-i" ]; then
-        install_tools
-        draw_progress_bar $i
-    else
-        display_help
-    fi
-
-done
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
+    display_help
+elif [ "$1" == "--version" ] || [ "$1" == "-v" ]; then
+    display_version
+elif [ "$1" == "--update" ] || [ "$1" == "-u" ]; then
+    update_tools
+    draw_progress_bar $i
+elif [ "$1" == "--install" ] || [ "$1" == "-i" ]; then
+    install_tools
+    draw_progress_bar $i
+else
+    display_help
+fi
 
 # Remove progress bar
 destroy_scroll_area
