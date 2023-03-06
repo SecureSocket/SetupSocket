@@ -72,17 +72,20 @@ install_tools() {
     done
 }
 
-
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
     display_help
 elif [ "$1" == "--version" ] || [ "$1" == "-v" ]; then
     display_version
 elif [ "$1" == "--update" ] || [ "$1" == "-u" ]; then
-    update_tools
-    draw_progress_bar $i
+    for i in {1..99}; do
+        update_tools
+        draw_progress_bar $i
+    done
 elif [ "$1" == "--install" ] || [ "$1" == "-i" ]; then
-    install_tools
-    draw_progress_bar $i
+    for i in {1..99}; do
+        install_tools
+        draw_progress_bar $i
+    done
 else
     display_help
 fi
