@@ -37,18 +37,19 @@ display_version() {
 update_tools() {
     # Read the list of repos from a file
     repos=($(cat /usr/local/bin/repo_name))
+    num_repos=${#repos[@]}
+    max_value=100
 
     # Loop through the list of repos
-    for repo in "${repos[@]}"; do
+    for ((i=0; i<num_repos; i++)); do
         # Check if the repo directory is a git repository
-        if [ -d "$repo/.git" ]; then
+        if [ -d "${repos[$i]}/.git" ]; then
             # If it is, update the repo
-            echo "Updating $repo"
-            cd "$repo"
+            echo "Updating ${repos[$i]}"
+            cd "${repos[$i]}"
             (git pull  > /dev/null 2>&1)
             cd ..
-            draw_progress_bar $i
-            ((i++))
+            draw_progress_bar $((i * max_value / num_repos)) $max_value
         fi
     done
     echo "All repositories and dependencies are up-to-date"
@@ -59,15 +60,16 @@ install_tools() {
     # read repo list from file
     repos=($(cat /usr/local/bin/repo_list))
     repos1=($(cat /usr/local/bin/repo_name))
+    num_repos=${#repos[@]}
+    max_value=100
 
-    for repo in ${!repos[*]}; do
+    for ((i=0; i<num_repos; i++)); do
         # check if the repo directory exists
-        if [ ! -d "${repos[$repo]}" ]; then
+        if [ ! -d "${repos[$i]}" ]; then
             # if it doesn't exist, clone the repo
-            echo "Installing ${repos1[$repo]}"
-            (git clone --depth 1 "${repos[$repo]}"  > /dev/null 2>&1)
-            draw_progress_bar $i
-            ((i++))
+            echo "Installing ${repos1[$i]}"
+            (git clone --depth 1 "${repos[$i]}"  > /dev/null 2>&1)
+            draw_progress_bar $((i * max_value / num_repos)) $max_value
         fi
     done
 }
@@ -78,10 +80,8 @@ elif [ "$1" == "--version" ] || [ "$1" == "-v" ]; then
     display_version
 elif [ "$1" == "--update" ] || [ "$1" == "-u" ]; then
     update_tools
-    draw_progress_bar $i
 elif [ "$1" == "--install" ] || [ "$1" == "-i" ]; then
     install_tools
-    draw_progress_bar $i
 else
     display_help
 fi
