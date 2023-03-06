@@ -58,7 +58,6 @@ nagioscore
 mtr
 ngrep
 nmap
-ntp-refclock
 oauth2-proxy
 opendnssec
 OpenSC
