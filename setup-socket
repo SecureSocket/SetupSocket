@@ -36,23 +36,35 @@ display_version() {
 # Function to update all repositories and dependencies
 update_tools() {
     # Read the list of repos from a file
-    repos=($(cat /usr/local/bin/SetupSocket/repo_name))
+    repos=($(cat /usr/local/bin/SetupSocket/repo_list))
+    repos1=($(cat /usr/local/bin/SetupSocket/repo_name))
     num_repos=${#repos[@]}
     max_value=100
+
+    # Change to /home/secure directory
+    cd /home/secure
 
     # Loop through the list of repos
     for ((i=0; i<num_repos; i++)); do
         # Check if the repo directory is a git repository
-        if [ -d "${repos[$i]}/.git" ]; then
+        if [ -d "${repos1[$i]}/.git" ]; then
             # If it is, update the repo
-            echo "Updating ${repos[$i]}"
-            cd "${repos[$i]}"
+            echo "Updating ${repos1[$i]}"
+            cd "${repos1[$i]}"
             (git pull  > /dev/null 2>&1)
             cd ..
+            draw_progress_bar $((i * max_value / num_repos)) $max_value
+        elif [ ! -d "${repos1[$i]}" ]; then   # use repo_name instead of repo_list
+            # if it doesn't exist, clone the repo
+            echo "Updating ${repos1[$i]}"
+            (git clone --depth 1 "${repos[$i]}" > /dev/null 2>&1)
             draw_progress_bar $((i * max_value / num_repos)) $max_value
         fi
     done
     echo "All repositories and dependencies are up-to-date"
+
+    # Change back to the previous directory
+    cd -
 }
 
 # Function to install all repositories and dependencies
@@ -63,15 +75,21 @@ install_tools() {
     num_repos=${#repos[@]}
     max_value=100
 
+    # Change to /home/secure directory
+    cd /home/secure
+
     for ((i=0; i<num_repos; i++)); do
         # check if the repo directory exists
-        if [ ! -d "${repos[$i]}" ]; then
+        if [ ! -d "${repos1[$i]}" ]; then   # use repo_name instead of repo_list
             # if it doesn't exist, clone the repo
             echo "Installing ${repos1[$i]}"
-            (git clone --depth 1 "${repos[$i]}"  > /dev/null 2>&1)
+            (git clone --depth 1 "${repos[$i]}" > /dev/null 2>&1)
             draw_progress_bar $((i * max_value / num_repos)) $max_value
         fi
     done
+
+    # Change back to the previous directory
+    cd -
 }
 
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
